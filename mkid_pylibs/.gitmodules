@@ -1,0 +1,3 @@
+[submodule "rhea_comm"]
+	path = rhea_comm
+	url = ssh://git@gitlab.emperor.riken.jp:52222/gb/rhea_comm.git

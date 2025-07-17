@@ -1,0 +1,6 @@
+[submodule "rhea_comm"]
+	path = rhea_comm
+	url = git@github.com:groundbird/rhea_comm.git
+[submodule "mkid_pylibs"]
+	path = mkid_pylibs
+	url = git@github.com:groundbird/mkid_pylibs.git

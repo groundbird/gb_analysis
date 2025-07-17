@@ -1,0 +1,22 @@
+{
+    "kids": [
+       0
+    ],
+    "kids_freqs": [
+        15.558
+    ],
+    "kids_power": [
+        4
+    ],
+    "blinds": [
+    ],
+    "blinds_relfreqs": [
+    ],
+    "blinds_power": [
+    ],
+    "kids_fitconfig": [
+        {"nfwhm": -1}
+    ],
+    "array_name": "DUMMYARRAY",
+    "sg_freq": 5000000000.0
+}
