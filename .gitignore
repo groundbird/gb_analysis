@@ -1,2 +1,10 @@
-raw_data
-__pycache__
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+raw_data/
+*.pkl
+*.log
+.vscode/
+.idea/
