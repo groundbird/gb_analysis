@@ -21,7 +21,7 @@ data = read_rawdata_cpp(8448, log=True, saveraw=True)
 ```
 
 ### Batch Processing
-1. Edit measurement IDs in `process_measurements.sh`:
+1. Edit measurement IDs in `run_use_raw_cpp.sh`:
 ```bash
 MEAS_IDS=(
     8448
@@ -32,7 +32,7 @@ MEAS_IDS=(
 2. Execute:
 ```bash
 chmod +x process_measurements.sh
-./process_measurements.sh
+./run_use_raw_cpp.sh
 ```
 
 ### Command Line
