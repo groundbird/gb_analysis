@@ -43,7 +43,7 @@ python use_raw_cpp.py 8448
 ## Output Data
 
 ### Save Location
-- Directory: `./raw_data/`
+- Directory: `./raw_data/`(config.py `SAVEDIR`)
 - Filename: `{chip}_{meas_id}.pkl`
 
 ### Data Structure
@@ -61,6 +61,43 @@ python use_raw_cpp.py 8448
     }
 }
 ```
+
+## Plot Output
+
+### Save Location
+Images are saved under `SAVEDIR/plot/` by category (configured by `SAVEDIR` in config.py).
+```
+SAVEDIR/
+├── raw_data/                        # pickle data
+│   └── {chip}_{meas_id}.pkl
+└── plot/
+    ├── swpamp/                      # Sweep amplitude
+    │   └── swpamp_{meas_id}_{daq}_{chip}.jpg
+    ├── bswpamp/                     # Blind tone sweep amplitude
+    │   └── bswpamp_{meas_id}_{daq}_{chip}.jpg
+    ├── swpiq/                       # Sweep I-Q circle
+    │   └── swpiq_{meas_id}_{daq}_{chip}.jpg
+    ├── psd/                         # Power spectral density
+    │   └── psd_{meas_id}_{daq}_{chip}.jpg
+    ├── tod/                         # Time ordered data
+    │   └── tod_{meas_id}_{daq}_{chip}.jpg
+    └── log/                         # Environmental log (temperature, PWV, humidity)
+        └── log_{meas_id}_{daq}_{chip}.jpg
+```
+
+### Plot Methods
+```python
+data = read_rawdata_cpp(8448, log=True, saveraw=True)
+
+data.plot_swpamp(save=True)   # Sweep amplitude for each KID
+data.plot_bswpamp(save=True)  # Blind tone sweep amplitude
+data.plot_swpiq(save=True)    # I-Q circle with fit result
+data.plot_psd(save=True)      # Power spectral density
+data.plot_tod(save=True)      # Time ordered data (KID vs blind tone)
+data.plot_log(save=True)      # Environmental log (requires log=True)
+```
+
+> **Note**: `plot_log` is only available when initialized with `log=True` (default). If an error occurs, it will be skipped automatically.
 
 ## Main Features
 - **Automatic fitting**: Resonance fitting with chip-specific configurations
