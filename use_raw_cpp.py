@@ -6,6 +6,19 @@ def process_meas_id(meas_id):
     rcpp(meas_id=meas_id, log=True, saveraw=True)
 
 
+def process_meas_id(meas_id):
+    meas_id = int(meas_id)
+    data = rcpp(meas_id=meas_id, log=True, saveraw=True)
+    data.plot_swpamp()
+    # data.plot_bswpamp()
+    # data.plot_swpiq()
+    # data.plot_psd()
+    # data.plot_tod()
+    # try:
+    #     data.plot_log()
+    # except Exception as e:
+    #     print(f"plot_log failed: {e}")
+
 def main(meas_ids):
     for meas_id in meas_ids:
         process_meas_id(meas_id)
