@@ -68,14 +68,34 @@ def _fit(function, xs, ys, err=None, via=None, range=None, silent=True, convert=
                 raise RuntimeError(f'{type(v)} for {k}: Not Implemented parameter value type')
     else:
         raise RuntimeError(f'{type(via)}: Not Implemented via type')
-    
+
+    # # add by ysueno for set limit at 2KID fit
+    # if 'fr1' in params.keys():
+    #     #params['fr2'].min = (params['fr1'] + params['fr2'])/2
+    #     #params['fr1'].max = (params['fr1'] + params['fr2'])/2
+
+    #     params['fr2'].min = (via['fr1'] + via['fr2'])/2
+    #     params['fr1'].max = (via['fr1'] + via['fr2'])/2
     # add by ysueno for set limit at 2KID fit
     if 'fr1' in params.keys():
-        #params['fr2'].min = (params['fr1'] + params['fr2'])/2
-        #params['fr1'].max = (params['fr1'] + params['fr2'])/2
+        # Extract scalar value from lmfit.Parameter if necessary
+        fr1_val = via['fr1'].value if isinstance(via['fr1'], lmfit.Parameter) else via['fr1']
+        fr2_val = via['fr2'].value if isinstance(via['fr2'], lmfit.Parameter) else via['fr2']
 
-        params['fr2'].min = (via['fr1'] + via['fr2'])/2
-        params['fr1'].max = (via['fr1'] + via['fr2'])/2
+        mid  = (fr1_val + fr2_val) / 2
+
+        # Use user-specified min/max if fr1/fr2 are passed as lmfit.Parameter,
+        # otherwise fall back to auto bounds based on peak separation (span).
+        # The midpoint boundary is always enforced to prevent fr1/fr2 from swapping.
+        if isinstance(via['fr1'], lmfit.Parameter) and via['fr1'].max is not None and not np.isinf(via['fr1'].max):
+            params['fr1'].max = min(via['fr1'].max, mid)  # user max と mid の小さい方
+        else:
+            params['fr1'].max = mid
+
+        if isinstance(via['fr2'], lmfit.Parameter) and via['fr2'].min is not None and not np.isinf(via['fr2'].min):
+            params['fr2'].min = max(via['fr2'].min, mid)  # user min と mid の大きい方
+        else:
+            params['fr2'].min = mid
 
     ## prepare Dfun if function is an Expr_with_args object
     if type(function) == Expr_with_args:
