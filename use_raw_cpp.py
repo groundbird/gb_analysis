@@ -8,7 +8,7 @@ def process_meas_id(meas_id):
 
 def process_meas_id(meas_id):
     meas_id = int(meas_id)
-    data = rcpp(meas_id=meas_id, log=True, saveraw=True)
+    data = rcpp(meas_id=meas_id, log=True, saveraw=True, auto_fitconfig=True)
     data.plot_swpamp()
     # data.plot_bswpamp()
     # data.plot_swpiq()

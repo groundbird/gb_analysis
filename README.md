@@ -40,6 +40,49 @@ chmod +x process_measurements.sh
 python use_raw_cpp.py 8448
 ```
 
+## Fit Configuration
+### Manual Fitconfig (default)
+Chip-specific fitting parameters are defined in `config.py` → `get_fitconfig(chip)`.  
+Each chip has manually tuned settings for:
+- Frequency range (`rangeind`, `freqranges`)
+- Double resonance detection (`twokidind`, `twokidfitter`)
+- Initial parameters (`initind`, `fitinit`)
+- Fitting depth (`depind`, `dep`)
+- Guess skip (`skipind`, `guessskip`)
+
+### Auto Fitconfig (`auto_fitconfig=True`)
+Defined in `auto_fitconfig.py`. Fitting parameters are automatically determined from sweep data without any manual configuration.
+
+#### Double Dip Detection
+Dips in the sweep amplitude are detected using `scipy.signal.find_peaks` on the smoothed (uniform filter, size=20) inverted amplitude.  
+A KID is classified as a double resonance if exactly **2 peaks** are found above the prominence threshold (default: 5% of the amplitude range).
+
+- `gaolinbg2f`: TOD tone is closer to **fr1** (the lower frequency dip)
+- `gaolinbg2l`: TOD tone is closer to **fr2** (the higher frequency dip)
+
+#### Fitting Range
+Auto fitconfig does **not** set a frequency range (`rangeind`/`freqranges` are empty).  
+The full sweep range is used for all KIDs (`frqrange=[None, None]`).  
+If fitting fails due to a wide sweep range, switch to manual fitconfig and set `rangeind`/`freqranges` explicitly in `config.py`.
+
+#### Initial Parameters
+For each KID, initial parameters with constraints are automatically set as `lmfit.Parameter` objects:
+
+| Parameter | Initial Value | Range |
+|-----------|--------------|-------|
+| `fr` / `fr1` / `fr2` | Detected dip frequency | ±2×10⁵ Hz |
+| `Qr` / `Qr1` / `Qr2` | 1×10⁴ | 1×10³ – 1×10⁵ |
+| `Qc` / `Qc1` / `Qc2` | 2×10⁴ | 1×10³ – 1×10⁵ |
+| `phi0` / `phi01` / `phi02` | 0.0 | −π – π |
+| `absa` | max(sweep amplitude) | — |
+
+> **Note**: `dep`, `guess_skip` are not auto-detected and fall back to defaults (`dep=3`, `guess_skip=False`).
+
+#### Limitations
+- Detection may fail for noisy or asymmetric sweep profiles. In such cases, adjust `prominence_threshold` in `_has_double_dip()` or switch to manual fitconfig.
+- Frequency range is not constrained, so nearby resonances from other KIDs may interfere with the fit.
+
+
 ## Output Data
 
 ### Save Location

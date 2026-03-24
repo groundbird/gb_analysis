@@ -19,6 +19,7 @@ from kidslist import KidsList
 
 # Import configuration from separate file
 from config import CHIPS, DAQS, SAVEDIR, get_fitconfig
+from auto_fitconfig import get_auto_fitconfig
 
 
 class read_rawdata_cpp():
@@ -29,7 +30,8 @@ class read_rawdata_cpp():
     saveraw (bool): Save processed data to pickle file
     """
 
-    def __init__(self, meas_id, log=True, saveraw=False):
+    def __init__(self, meas_id, log=True, saveraw=False, auto_fitconfig=False):
+        self.auto_fitconfig = auto_fitconfig
         self.meas_id = meas_id
         db = gbp.MeasDB(meas_id)
         self.daq = db.swppath.split('_')[-1][:4]
@@ -111,7 +113,11 @@ class read_rawdata_cpp():
     def _perform_fitting(self, kr):
         """Perform fitting for all KIDs."""
         nonphase = [None] * len(kr)
-        config = get_fitconfig(self.chip)
+        if self.auto_fitconfig:
+            print("Using auto fitconfig")
+            config = get_auto_fitconfig(kr)
+        else:
+            config = get_fitconfig(self.chip)
         rangeind, freqranges, twokidind, twokidfitter, initind, fitinit, depind, depval, skipind, guessskip = config
 
         for i, ikr in enumerate(kr):
@@ -194,7 +200,36 @@ class read_rawdata_cpp():
             except:
                 pass
             plt.axvline(ikr.tod.f, c='green', label='TOD')
-            plt.legend()
+
+            # Plot fitted fr values
+            params = ikr.swp.fitresult.params
+
+            if 'fr' in params:
+                # Single resonance: always orange
+                fr_val = params['fr'].value
+                idx = np.argmin(np.abs(ikr.swp.f - fr_val))
+                plt.plot(fr_val, ikr.swp.amplitude[idx], '*',
+                        color='orange', markersize=12, label='fr')
+
+            elif 'fr1' in params and 'fr2' in params:
+                # Double resonance: determine target fr by fitter type
+                # gaolinbg2f -> fr1 (first) is the target: orange
+                # gaolinbg2l -> fr2 (last)  is the target: orange
+                fitter = ikr.swp.fitresult.fitter
+                if fitter == 'gaolinbg2f':
+                    colors = ('orange', 'cyan')
+                else:  # gaolinbg2l
+                    colors = ('cyan', 'orange')
+
+                fr1_val = params['fr1'].value
+                fr2_val = params['fr2'].value
+                for fr_val, color, label in zip(
+                        (fr1_val, fr2_val), colors, ('fr1', 'fr2')):
+                    idx = np.argmin(np.abs(ikr.swp.f - fr_val))
+                    plt.plot(fr_val, ikr.swp.amplitude[idx], '*',
+                            color=color, markersize=12, label=label)
+
+            plt.legend(fontsize=7)
             plt.ylabel('Amplitude [a.u.]')
             plt.xlabel('Frequency [Hz]')
             plt.title(f'kid{i:02}')
@@ -206,8 +241,10 @@ class read_rawdata_cpp():
         plt.savefig(dirpath + f'swpamp_{self.meas_id}_{self.daq}_{self.chip}.jpg')
         plt.close()
 
+
+
     def plot_bswpamp(self):
-        plt.figure(figsize=(30, 20))
+        plt.figure(figsize=(20, 20))
         for i, bi in enumerate(self.bind):
             plt.subplot(5, 5, i + 1)
             plt.plot(self.swpset[bi].f, np.abs(self.swpset[bi].iq), '.:', c='b', label='data')
@@ -284,7 +321,7 @@ class read_rawdata_cpp():
             os.makedirs(dirpath)
         plt.savefig(dirpath + f'tod_{self.meas_id}_{self.daq}_{self.chip}.jpg')
         plt.close()
-        
+
 def get_param(kr):
     """Extract parameters from KID analysis results."""
     df = pd.DataFrame()
