@@ -66,19 +66,29 @@ class read_rawdata_cpp():
         self.todset = todset
 
         # Quality check for blind frequencies
+        valid_mask = np.abs(klist.blinds_freq) > 0.1
+        valid_bind  = np.array(klist.blinds_index)[valid_mask]
+        valid_bfreq = klist.blinds_freq[valid_mask]
+
         good_bfreq = []
-        for ibind, ibfreq in zip(klist.blinds_index, klist.blinds_freq):
-            if np.abs(ibfreq) > 0.1:  # Skip very low frequencies
-                if not any(np.abs(np.diff(todset[ibind][0].phase)) > 6):
-                    good_bfreq.append(ibfreq)
+        good_bind  = []
+        for ibind, ibfreq in zip(valid_bind, valid_bfreq):
+            if not any(np.abs(np.diff(todset[ibind][0].phase)) > 6):
+                good_bfreq.append(ibfreq)
+                good_bind.append(ibind)
         good_bfreq = np.array(good_bfreq)
+        good_bind  = np.array(good_bind)
+
+        if len(good_bfreq) == 0:
+            print("WARNING: No good blind tones found. Using all valid blind tones.")
+            good_bfreq = valid_bfreq
+            good_bind  = valid_bind
 
         # Set nearest blind tone
         binds = []
         for ifreq in klist.kids_freq:
-            ind = np.where(np.min(np.abs(good_bfreq - ifreq)) ==
-                          np.abs(klist.blinds_freq - ifreq))[0][0]
-            binds.append(klist.blinds_index[ind])
+            ind = np.argmin(np.abs(good_bfreq - ifreq))
+            binds.append(good_bind[ind])
         self.bind = binds
 
         # Create KID analysis objects
