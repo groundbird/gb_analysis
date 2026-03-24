@@ -131,6 +131,8 @@ class read_rawdata_cpp():
             print(f'======== Fit KID{i:02} ==========')
             ikr.fitIQ(nfwhm=-1, frqrange=rangeini, fitter=twokidini, init=fitini, dep=dep, guess_skip=skip)
             nonphase[i] = 2 * np.tan(ikr.tod.rwmdata.corphase / 2.)
+            ikr._fitter = twokidini
+
 
         self.phase = nonphase
 
@@ -190,7 +192,7 @@ class read_rawdata_cpp():
         plt.close()
 
     def plot_swpamp(self):
-        plt.figure(figsize=(30, 20))
+        plt.figure(figsize=(20, 14))
         for i, ikr in enumerate(self.kr):
             plt.subplot(5, 5, i + 1)
             plt.plot(ikr.swp.f, ikr.swp.amplitude, '.:', c='b', label='data')
@@ -215,7 +217,7 @@ class read_rawdata_cpp():
                 # Double resonance: determine target fr by fitter type
                 # gaolinbg2f -> fr1 (first) is the target: orange
                 # gaolinbg2l -> fr2 (last)  is the target: orange
-                fitter = ikr.swp.fitresult.fitter
+                fitter = getattr(ikr, '_fitter', 'gaolinbg')
                 if fitter == 'gaolinbg2f':
                     colors = ('orange', 'cyan')
                 else:  # gaolinbg2l
