@@ -21,6 +21,9 @@ from kidslist import KidsList
 from config import CHIPS, DAQS, SAVEDIR, get_fitconfig
 from auto_fitconfig import get_auto_fitconfig
 
+import socket
+
+
 
 class read_rawdata_cpp():
     """Class for reading KID's data based on gbproc and mkid_pylibs.
@@ -34,18 +37,22 @@ class read_rawdata_cpp():
         self.auto_fitconfig = auto_fitconfig
         self.meas_id = meas_id
         db = gbp.MeasDB(meas_id)
-        self.daq = db.swppath.split('_')[-1][:4]
+        swppath   = self._fix_path(db.swppath)
+        todpath   = self._fix_path(db.todpath)
+        klistpath = self._fix_path(db.klistpath)
+
+        self.daq = swppath.split('_')[-1][:4]
         self.chip = CHIPS[np.where(DAQS == self.daq)[0][0]]
         print(f"DAQ: {self.daq}, Chip: {self.chip}")
 
         # Read data with cpp
         try:
-            swp = gbp.RheaSwpReader(db.swppath, klist.lofreq)
-            tod = gbp.RheaTodReader(db.todpath, klist.lofreq)
+            swp = gbp.RheaSwpReader(swppath, klist.lofreq)
+            tod = gbp.RheaTodReader(todpath, klist.lofreq)
         except:
-            klist = KidsList(db.klistpath)
-            swp = gbp.RheaSwpReader(db.swppath, klist.sg_freq)
-            tod = gbp.RheaTodReader(db.todpath, klist.sg_freq)
+            klist = KidsList(klistpath)
+            swp = gbp.RheaSwpReader(swppath, klist.sg_freq)
+            tod = gbp.RheaTodReader(todpath, klist.sg_freq)
             klist.blinds_freq = np.array(klist.blinds_freqs)
             klist.kids_freq = np.array(klist.kids_freqs)
 
@@ -109,6 +116,16 @@ class read_rawdata_cpp():
 
         if saveraw:
             self.save_rawdata_all()
+
+    def _path_changer(self,path, old='/data/gb', new='/data.kiwi/gb'):
+        """Replace directory name"""
+        return path.replace(old, new)
+
+    def _fix_path(self, path):
+        """Apply _path_changer only when running on moa server."""
+        if socket.gethostname() == 'moa':
+            return self._path_changer(path)
+        return path
 
     def _perform_fitting(self, kr):
         """Perform fitting for all KIDs."""
