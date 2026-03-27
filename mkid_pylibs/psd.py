@@ -14,15 +14,17 @@ def calc_psd_welch(amp, phs, rate, fold=None):
     :param fold: Folded-number for the PSD calculation. Lower number will provide more precise spectrum.
                  If not specified, the optimum number will be used.
     '''
-    size = 2**int(np.floor(np.log2(len(amp))))
-    if fold is None: fold = 2**(int(len(str(len(amp))))-2)
-    myamp=amp[:size]
-    myphs=phs[:size]
-    #myamp = amp[:size]/np.mean(amp[:size])
-    #myamp = myamp - np.mean(myamp)
-    #myphs = phs[:size]-np.average(phs[:size])
-    frq_, amp_ = scipy.signal.welch(myamp, fs=rate, nperseg=size/(fold+1))
-    frq_, phs_ = scipy.signal.welch(myphs, fs=rate, nperseg=size/(fold+1))
+    if fold is None:
+        fold = 2**(int(len(str(len(amp))))-2)
+    nperseg = 2**int(np.floor(np.log2(len(amp) / (fold+1))))
+
+    # size = 2**int(np.floor(np.log2(len(amp))))
+    # if fold is None: fold = 2**(int(len(str(len(amp))))-2)
+    # myamp=amp[:size]
+    # myphs=phs[:size]
+
+    frq_, amp_ = scipy.signal.welch(amp, fs=rate, nperseg=nperseg)
+    frq_, phs_ = scipy.signal.welch(phs, fs=rate, nperseg=nperseg)
     return frq_,amp_,phs_
 
 def calc_psd_fromdata(toddata, kind=None,fold=None):
