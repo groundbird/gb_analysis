@@ -82,7 +82,7 @@ class PSDAnalyzer(object):
     def fitIQ(self, **kws):
         if self._swpdata is not None:
             self._swpdata.fitIQ(**kws)
-            
+
         from .modIQ import rwIQ, modIQ
         from .KidGlobalResponse import KidGlobalResponse
         if self._cont_toddatalist is not None:
@@ -181,4 +181,3 @@ class PSDAnalyzer(object):
 
         from .nep import calc_nep
         self._nep = calc_nep(self.psd, dfr_dNqp=dfr_dNqp, dQiInv_dNqp=dQiInv_dNqp, swpfitresult=self._swpdata.fitresult, tqp=self.tqp, Nqp=Nqp)
-

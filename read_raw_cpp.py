@@ -9,7 +9,7 @@ import sys
 
 sys.path.append('/home/gb/program/analysis/gbproc_cpp/build')
 import gbirdproc as gbp
-sys.path.append('./mkid_pylibs/')
+sys.path.insert(0, './mkid_pylibs/')
 sys.path.append('./analyzer_db/')
 # sys.path.append('./rhea_comm/')
 import mkid_pylibs as klib
@@ -59,9 +59,13 @@ class read_rawdata_cpp():
         # Create data objects
         swpset = [klib.Swpdata(ifreq, 'I-Q', (iiq.real, iiq.imag))
                   for ifreq, iiq in zip(swp.freq, swp.iq)]
-        todset = [[klib.TODdata(tod.time, 'I-Q', (iiq.real, iiq.imag), ifreq,
-                               info={'n_rot': tod.syncnum, 'sync_off': tod.syncoff})]
-                  for ifreq, iiq in zip(tod.freq, tod.iq)]
+
+        sps = 1.0 / np.mean(np.diff(tod.time[:100]))
+
+        todset = [[klib.TODdata(np.arange(len(iiq)), sps, 'I-Q', (iiq.real, iiq.imag), ifreq,
+                info={'n_rot': tod.syncnum, 'sync_off': tod.syncoff})]
+                for ifreq, iiq in zip(tod.freq, tod.iq)]
+
         self.swpset = swpset
         self.todset = todset
 

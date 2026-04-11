@@ -81,6 +81,7 @@ class _TimeArray_Index(object):
     def rate(self):
         return self._rate
 
+
 class _TimeArray_Timestamp(object):
     def __init__(self, timestamp):
         if type(timestamp[0]) is datetime.datetime:
@@ -98,7 +99,7 @@ class _TimeArray_Timestamp(object):
     def rate(self):
         if len(self._timestamp)>1:
             return 1./np.average(self._timestamp[1:] - self._timestamp[:-1]) #[Hz]
-
+        
 class FreqArray(object):
     """
     A class for representing array of frequency
@@ -156,4 +157,3 @@ class FreqArray(object):
         if offset is None: return None
         self._data = self._data + misc.tofrq(offset)
         return self._data
-

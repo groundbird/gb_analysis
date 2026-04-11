@@ -11,7 +11,7 @@ import numpy as np
 # System Configuration
 CHIPS = np.array(['3A', '2A', '3B', '1A', '2B', '1B', '220'])
 DAQS = np.array(['GB01', 'GB02', 'GB03', 'GB04', 'GB05', 'GB06', 'GB07'])
-SAVEDIR = './'
+SAVEDIR = '/home/miku/workspace/wiregrid/save_data/'
 
 
 
@@ -88,7 +88,7 @@ def get_fitconfig(chip):
             #guessskip = [True, True, True]
             skipind = [7]
             guessskip = [True]
-            
+
             return rangeind, freqranges, twokidind, twokidfitter, initind, fitinit, depind, dep, skipind, guessskip
         elif chip == '3B':
             #rangeind = [0, 12]
@@ -106,7 +106,7 @@ def get_fitconfig(chip):
             guessskip = []
             return rangeind, freqranges, twokidind, twokidfitter, initind, fitinit, depind, dep, skipind, guessskip
         elif chip == '220':
-            rangeind = [0, 2, 15] 
+            rangeind = [0, 2, 15]
             freqranges = [(4.854e9, 4.857e9), (4.867e9, 4.869e9), (4.993e9, 4.995e9)]
             twokidind = [14]
             twokidfitter = ['gaolinbg2f']
