@@ -205,8 +205,14 @@ def analytical_search_peak(data):
 
     f0ind = np.argmin(y0 - (a0*x0+b0))
     f = x0[f0ind]
-    flind = np.argmin(np.abs(y0[f0ind]/2.0 + (a0*x0[f0ind]+b0)/2.0 - y0[:f0ind]))
-    frind = np.argmin(np.abs(y0[f0ind]/2.0 + (a0*x0[f0ind]+b0)/2.0 - y0[f0ind:])) + f0ind
+    if f0ind == 0:
+        flind = 0
+    else:
+        flind = np.argmin(np.abs(y0[f0ind]/2.0 + (a0*x0[f0ind]+b0)/2.0 - y0[:f0ind]))
+    if f0ind >= len(y0) - 1:
+        frind = len(y0) - 1
+    else:
+        frind = np.argmin(np.abs(y0[f0ind]/2.0 + (a0*x0[f0ind]+b0)/2.0 - y0[f0ind:])) + f0ind
     dl = f0ind - flind
     bgl = y0[np.amax([int(f0ind-3*dl),0])]
     dr = frind - f0ind
@@ -245,7 +251,10 @@ def analytical_search_peak2(data, dep = 3):
     print(f'f2 : {f2}')
     
     # first KID
-    flind1 = np.argmin(np.abs(y0[f1ind]/2.0 + (a0*x0[f1ind]+b0)/2.0 - y0[:f1ind]))
+    if f1ind == 0:
+        flind1 = 0
+    else:
+        flind1 = np.argmin(np.abs(y0[f1ind]/2.0 + (a0*x0[f1ind]+b0)/2.0 - y0[:f1ind]))
     frind1 = np.argmin(np.abs(y0[f1ind]/2.0 + (a0*x0[f1ind]+b0)/2.0 - y0[f1ind:])) + f1ind
     dl1 = f1ind - flind1
     dr1 = frind1 - f1ind
@@ -257,7 +266,10 @@ def analytical_search_peak2(data, dep = 3):
     
     
     # second KID
-    flind2 = np.argmin(np.abs(y0[f2ind]/2.0 + (a0*x0[f2ind]+b0)/2.0 - y0[:f2ind]))
+    if f2ind == 0:
+        flind2 = 0
+    else:
+        flind2 = np.argmin(np.abs(y0[f2ind]/2.0 + (a0*x0[f2ind]+b0)/2.0 - y0[:f2ind]))
     frind2 = np.argmin(np.abs(y0[f2ind]/2.0 + (a0*x0[f2ind]+b0)/2.0 - y0[f2ind:])) + f2ind
     dl2 = f2ind - flind2
     dr2 = frind2 - f2ind

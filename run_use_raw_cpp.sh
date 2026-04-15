@@ -3,8 +3,9 @@
 # Define an array of measurement IDs
 MEAS_IDS=(
 
-    8448
-    
+    29203
+    29204
+
 )
 
 # Path to the Python script

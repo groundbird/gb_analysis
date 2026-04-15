@@ -11,7 +11,7 @@ import numpy as np
 # System Configuration
 CHIPS = np.array(['3A', '2A', '3B', '1A', '2B', '1B', '220'])
 DAQS = np.array(['GB01', 'GB02', 'GB03', 'GB04', 'GB05', 'GB06', 'GB07'])
-SAVEDIR = '/home/miku/workspace/wiregrid/save_data/'
+SAVEDIR = './data/'
 
 
 

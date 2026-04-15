@@ -104,32 +104,47 @@ class read_rawdata_cpp():
 
         # Read azimuth and elevation data
         print("Reading AzEl data")
-        az = gbp.get_syncaz_rhea(tod, 41, False, False)
-        el = gbp.get_syncel_rhea(tod, 0, False, False)
+        try:
+            az = gbp.get_syncaz_rhea(tod, 41, False, False)
+            el = gbp.get_syncel_rhea(tod, 0, False, False)
 
-        # Process log data if requested
-        if log:
-            print("Reading Log data")
-            log = gbp.LogContainer(az.time)
-            good = self._process_log_data(log, kr)
-        else:
-            good = np.ones(len(az.time), dtype=bool)
-            good[:1000] = False  # Skip first 1000 points
-            log = None
+            # Process log data if requested
+            if log:
+                print("Reading Log data")
+                log = gbp.LogContainer(az.time)
+                good = self._process_log_data(log, kr)
+            else:
+                good = np.ones(len(az.time), dtype=bool)
+                good[:1000] = False  # Skip first 1000 points
+                log = None
 
-        # Store results
-        self.kr = kr
-        self.klist = klist
-        self.az = az
-        self.el = el
-        self.rpm = az.speed
-        self.time = np.array([datetime.fromtimestamp(itime, timezone.utc) for itime in az.time])
-        self.good = good
-        self.log = log
-        self.param = get_param(self.kr)
+            # Store results
+            self.kr = kr
+            self.klist = klist
+            self.az = az
+            self.el = el
+            self.rpm = az.speed
+            self.time = np.array([datetime.fromtimestamp(itime, timezone.utc) for itime in az.time])
+            self.good = good
+            self.log = log
+            self.param = get_param(self.kr)
+
+        except Exception as e:
+            print(f"Failed to read AzEl or Log data: {e}")
+            self.kr = kr
+            self.klist = klist
+            self.az = None
+            self.el = None
+            self.rpm = None
+            self.time = None
+            self.good = None
+            self.log = None
+            self.param = get_param(self.kr)
+
 
         if saveraw:
             self.save_rawdata_all()
+
 
     def _path_changer(self,path, old='/data/gb', new='/data.kiwi/gb'):
         """Replace directory name"""
@@ -188,13 +203,25 @@ class read_rawdata_cpp():
 
     def save_rawdata_all(self):
         """Save all raw data to pickle file."""
-        ret = {
-            'swp_param': self.param.to_dict(),
-            'utime': self.az.time[self.good],
-            'el': self.el.angle[self.good],
-            'az': self.az.angle[self.good],
-            'phase': {f'kid{i:02}': self.phase[i][self.good] for i in range(len(self.kr))}
-        }
+        if self.az is not None and self.good is not None:
+            ret = {
+                'swp_param': self.param.to_dict(),
+                'utime': self.az.time[self.good],
+                'el': self.el.angle[self.good],
+                'az': self.az.angle[self.good],
+                'phase': {f'kid{i:02}': self.phase[i][self.good] for i in range(len(self.kr))}
+            }
+        else:
+            # az/el が取得できなかった場合はフルのphaseデータを保存
+            print("WARNING: az/el data unavailable. Saving sweep params and full phase data without pointing info.")
+            ret = {
+                'swp_param': self.param.to_dict(),
+                'utime': None,
+                'el': None,
+                'az': None,
+                'phase': {f'kid{i:02}': self.phase[i] for i in range(len(self.kr))}
+            }
+
 
         if not os.path.isdir(SAVEDIR + 'raw_data'):
             os.mkdir(SAVEDIR + 'raw_data')

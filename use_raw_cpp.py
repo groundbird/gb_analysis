@@ -12,7 +12,7 @@ def process_meas_id(meas_id):
     data.plot_swpamp()
     # data.plot_bswpamp()
     # data.plot_swpiq()
-    # data.plot_psd()
+    data.plot_psd()
     # data.plot_tod()
     # try:
     #     data.plot_log()
